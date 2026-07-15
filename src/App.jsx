@@ -1,7 +1,7 @@
-import Login from './pages/Login.jsx'
+import SuperAdmin from './pages/super-admin/SuperAdmin.jsx'
 
 function App() {
-  return <Login />
+  return <SuperAdmin />
 }
 
 export default App
