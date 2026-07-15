@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import logo from '../assets/logo.png'
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -24,7 +25,7 @@ export default function Login() {
         :root {
           --bg: #0B1F17;
           --bg-2: #0F2A20;
-          --card: #FFFFFF;
+          --card: #12241C;
           --accent: #1E8F5E;
           --accent-light: #33B37A;
           --ink: #0B1F17;
@@ -67,7 +68,7 @@ export default function Login() {
         }
 
         .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-        .brand svg { width: 34px; height: 34px; }
+        .brand-logo { width: 34px; height: 34px; object-fit: contain; }
         .brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; color: #F4F7F5; letter-spacing: -0.02em; }
         .brand-name span { color: var(--accent-light); }
 
@@ -82,7 +83,7 @@ export default function Login() {
         .scan-strip {
           height: 10px;
           width: 100%;
-          background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 5px, var(--ink) 5px 6px, transparent 6px 11px, var(--ink) 11px 14px, transparent 14px 22px);
+          background: repeating-linear-gradient(90deg, #F4F7F5 0 2px, transparent 2px 5px, #F4F7F5 5px 6px, transparent 6px 11px, #F4F7F5 11px 14px, transparent 14px 22px);
           position: relative;
           overflow: hidden;
         }
@@ -104,7 +105,7 @@ export default function Login() {
         }
 
         .card-body { padding: 34px 32px 28px; }
-        .tagline { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+        .tagline { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; color: #F4F7F5; margin-bottom: 4px; }
         .subtext { font-size: 13px; color: var(--muted); margin-bottom: 26px; }
 
         .field { margin-bottom: 16px; }
@@ -122,16 +123,16 @@ export default function Login() {
           display: flex;
           align-items: center;
           gap: 10px;
-          border: 1.5px solid var(--border);
+          border: 1.5px solid #24382E;
           border-radius: 10px;
           padding: 11px 13px;
           transition: border-color .15s ease, box-shadow .15s ease;
-          background: #FBFCFB;
+          background: #0E1C15;
         }
         .input-wrap:focus-within {
           border-color: var(--accent);
-          box-shadow: 0 0 0 3px rgba(30,143,94,0.12);
-          background: #fff;
+          box-shadow: 0 0 0 3px rgba(30,143,94,0.18);
+          background: #0E1C15;
         }
         .input-wrap svg { width: 17px; height: 17px; color: var(--muted); flex-shrink: 0; }
         .input-wrap:focus-within svg { color: var(--accent); }
@@ -142,11 +143,11 @@ export default function Login() {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
           width: 100%;
-          color: var(--ink);
+          color: #F4F7F5;
         }
-        .input-wrap input::placeholder { color: #A7B0AB; }
+        .input-wrap input::placeholder { color: #5C6E64; }
         .toggle-pass { cursor: pointer; color: var(--muted); display: flex; }
-        .toggle-pass:hover { color: var(--ink); }
+        .toggle-pass:hover { color: #F4F7F5; }
 
         .actions { display: flex; gap: 10px; margin-top: 22px; }
         .btn {
@@ -163,8 +164,8 @@ export default function Login() {
         .btn:active { transform: scale(0.97); }
         .btn-primary { background: var(--accent); color: #fff; }
         .btn-primary:hover { filter: brightness(1.07); }
-        .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
-        .btn-ghost:hover { color: var(--ink); border-color: #C9D1CC; }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid #24382E; }
+        .btn-ghost:hover { color: #F4F7F5; border-color: #3A5346; }
 
         .links { display: flex; justify-content: space-between; margin-top: 18px; }
         .links a { font-size: 12.5px; color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; }
@@ -179,12 +180,7 @@ export default function Login() {
 
       <div className="scene">
         <div className="brand">
-          <svg viewBox="0 0 40 40" fill="none">
-            <rect x="2" y="2" width="36" height="36" rx="9" fill="#0F2A20" stroke="#1E8F5E" strokeWidth="1.5"/>
-            <path d="M12 24 L18 14 L23 20 L28 12" stroke="#33B37A" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <path d="M23 12 H28 V17" stroke="#33B37A" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <rect x="11" y="26" width="18" height="2.4" rx="1.2" fill="#1E8F5E"/>
-          </svg>
+          <img src={logo} alt="OptiStock" className="brand-logo" />
           <div className="brand-name">Opti<span>Stock</span></div>
         </div>
 
