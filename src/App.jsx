@@ -18,6 +18,8 @@ import Expiration from './pages/super-admin/abonnements/Expiration.jsx'
 
 import ParametresLayout from './pages/super-admin/parametres/ParametresLayout.jsx'
 import MotsDePasse from './pages/super-admin/parametres/MotsDePasse.jsx'
+import Comptes from './pages/super-admin/parametres/Comptes.jsx'
+import Historique from './pages/super-admin/parametres/Historique.jsx'
 import Assistance from './pages/super-admin/parametres/Assistance.jsx'
 import Journaux from './pages/super-admin/parametres/Journaux.jsx'
 import Sauvegarde from './pages/super-admin/parametres/Sauvegarde.jsx'
@@ -83,10 +85,12 @@ function App() {
           <Route path="parametres" element={<ParametresLayout />}>
             <Route index element={<Navigate to="mots-de-passe" replace />} />
             <Route path="mots-de-passe" element={<MotsDePasse />} />
-            <Route path="assistance" element={<Assistance />} />
-            <Route path="journaux" element={<Journaux />} />
-            <Route path="sauvegarde" element={<Sauvegarde />} />
-            <Route path="maintenance" element={<Maintenance />} />
+<Route path="comptes" element={<Comptes />} />
+<Route path="historique" element={<Historique />} />
+<Route path="assistance" element={<Assistance />} />
+<Route path="journaux" element={<Journaux />} />
+<Route path="sauvegarde" element={<Sauvegarde />} />
+<Route path="maintenance" element={<Maintenance />} />
           </Route>
         </Route>
       </Routes>

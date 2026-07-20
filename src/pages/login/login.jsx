@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import { supabase, telephoneVersEmail } from '../../lib/supabaseClient.js'
 
+const MAX_TENTATIVES = 3
+const DUREE_BLOCAGE_MS = 15 * 60 * 1000
+
 export default function Login() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
@@ -23,6 +26,17 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
+    const blocageKey = `blocage_${form.userId}`
+    const tentativesKey = `tentatives_${form.userId}`
+    const blocageJusquA = localStorage.getItem(blocageKey)
+
+    if (blocageJusquA && Date.now() < parseInt(blocageJusquA)) {
+      const minutesRestantes = Math.ceil((parseInt(blocageJusquA) - Date.now()) / 60000)
+      setError(`Compte temporairement bloqué. Réessayez dans ${minutesRestantes} minute(s).`)
+      return
+    }
+
     setLoading(true)
 
     const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -31,10 +45,24 @@ export default function Login() {
     })
 
     if (authError) {
-      setError("Identifiant ou mot de passe incorrect.")
+      const tentatives = parseInt(localStorage.getItem(tentativesKey) || '0') + 1
+      localStorage.setItem(tentativesKey, tentatives.toString())
+
+      if (tentatives >= MAX_TENTATIVES) {
+        const jusquA = Date.now() + DUREE_BLOCAGE_MS
+        localStorage.setItem(blocageKey, jusquA.toString())
+        localStorage.removeItem(tentativesKey)
+        setError('Trop de tentatives échouées. Compte bloqué pendant 15 minutes.')
+      } else {
+        setError(`Identifiant ou mot de passe incorrect. Tentative ${tentatives}/${MAX_TENTATIVES}.`)
+      }
+
       setLoading(false)
       return
     }
+
+    localStorage.removeItem(`tentatives_${form.userId}`)
+    localStorage.removeItem(`blocage_${form.userId}`)
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -96,7 +124,7 @@ export default function Login() {
         .input-wrap input::placeholder { color: #5C6E64; }
         .toggle-pass { cursor: pointer; color: var(--muted); display: flex; }
         .toggle-pass:hover { color: #F4F7F5; }
-        .error-msg { background: rgba(194,75,63,.12); color: #E36A5C; font-size: 12.5px; padding: 10px 13px; border-radius: 9px; margin-bottom: 16px; }
+        .error-msg { background: rgba(194,75,63,.12); color: #E36A5C; font-size: 12.5px; padding: 10px 13px; border-radius: 9px; margin-bottom: 16px; border: 1px solid rgba(194,75,63,.2); line-height: 1.4; }
         .actions { display: flex; gap: 10px; margin-top: 22px; }
         .btn { flex: 1; padding: 12px 14px; border-radius: 10px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13.5px; cursor: pointer; border: none; transition: transform .12s, filter .12s; }
         .btn:active { transform: scale(0.97); }

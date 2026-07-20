@@ -8,7 +8,7 @@ import {
   genererMotDePasse,
 } from '../../../lib/supabaseClient.js'
 
-const emptyForm = { prefixeGerant: '', nomEtablissement: '', type: 'Boutique', nomGerant: '', dateFin: '' }
+const emptyForm = { prefixeGerant: '', nomGerant: '', nomEtablissement: '', type: 'Boutique', dateFin: '' }
 const TYPES = ['Boutique', 'Pharmacie', 'Alimentation', 'Mini-supermarché', 'Dépôt', 'Magasin', 'Entrepôt']
 
 export default function Creation() {
@@ -28,18 +28,22 @@ export default function Creation() {
   const submit = async (e) => {
     e.preventDefault()
     if (form.prefixeGerant.length !== 3) {
-      setError("Saisis exactement 3 chiffres pour le préfixe du gérant.")
+      setError("Saisis exactement 3 chiffres pour le préfixe.")
       return
     }
     setError('')
     setLoading(true)
 
-    // 1. Générer le numéro et mot de passe du gérant
     const numeroGerant = genererNumeroGerant(form.prefixeGerant)
     const motDePasse = genererMotDePasse()
     const emailGerant = telephoneVersEmail(numeroGerant)
 
-    // 2. Créer le compte Auth Supabase pour le gérant
+    // Date de fin automatique : 30 jours
+    const dateFinDefaut = new Date()
+    dateFinDefaut.setDate(dateFinDefaut.getDate() + 30)
+    const dateFin = form.dateFin || dateFinDefaut.toISOString().slice(0, 10)
+
+    // 1. Créer le compte Auth du gérant
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: emailGerant,
       password: motDePasse,
@@ -54,7 +58,7 @@ export default function Creation() {
 
     const gerantId = authData.user.id
 
-    // 3. Créer le profil gérant dans la table profiles
+    // 2. Créer le profil gérant
     const { error: profileError } = await supabase.from('profiles').insert({
       id: gerantId,
       role: 'gerant',
@@ -68,12 +72,7 @@ export default function Creation() {
       return
     }
 
-    // 4. Calculer la date de fin (30 jours si non spécifiée)
-    const dateFinDefaut = new Date()
-    dateFinDefaut.setDate(dateFinDefaut.getDate() + 30)
-    const dateFin = form.dateFin || dateFinDefaut.toISOString().slice(0, 10)
-
-    // 5. Créer l'établissement dans Supabase
+    // 3. Créer l'établissement
     const { data: etab, error: etabError } = await supabase
       .from('etablissements')
       .insert({
@@ -89,24 +88,24 @@ export default function Creation() {
       .single()
 
     if (etabError) {
-      setError(`Erreur création de l'établissement : ${etabError.message}`)
+      setError(`Erreur création établissement : ${etabError.message}`)
       setLoading(false)
       return
     }
 
-    // 6. Lier le gérant à son établissement
-    await supabase.from('profiles').update({
-      etablissement_id: etab.id,
-    }).eq('id', gerantId)
+    // 4. Lier le gérant à l'établissement
+    await supabase.from('profiles')
+      .update({ etablissement_id: etab.id })
+      .eq('id', gerantId)
 
-    // 7. Mettre à jour le state local
-    setEtablissements((list) => [...list, { ...etab, statut: 'Actif' }])
+    setEtablissements((list) => [...list, etab])
 
     setResultat({
       nomEtablissement: form.nomEtablissement,
       nomGerant: form.nomGerant,
       numeroGerant,
       motDePasse,
+      dateFin,
     })
 
     setForm(emptyForm)
@@ -122,52 +121,46 @@ export default function Creation() {
 
       {/* Résultat après création */}
       {resultat && (
-        <div style={{
-          background: 'var(--accent-pale)', border: '1px solid rgba(20,108,67,.2)',
-          borderRadius: 12, padding: 18, marginBottom: 22,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Icon.Key style={{ width: 16, height: 16, color: 'var(--accent)' }} />
-            <strong style={{ fontSize: 13.5, color: 'var(--text)' }}>
-              Compte créé — « {resultat.nomEtablissement} »
-            </strong>
+        <div className="credentials-box">
+          <div className="cred-title">
+            <Icon.Key style={{ width: 16, height: 16 }} />
+            Compte créé — « {resultat.nomEtablissement} »
           </div>
-          <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14, lineHeight: 1.5 }}>
-            Transmets ces identifiants au gérant <b>{resultat.nomGerant}</b>. Il pourra se connecter dès maintenant avec son numéro et ce mot de passe.
+          <p className="cred-sub">
+            Transmets ces identifiants au gérant <strong>{resultat.nomGerant}</strong>.
+            Il peut se connecter dès maintenant avec son numéro de téléphone.
           </p>
 
-          {/* Numéro gérant */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 9, padding: '10px 14px', marginBottom: 8 }}>
+          <div className="cred-row">
             <div>
-              <div style={{ fontSize: 9.5, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '.06em', marginBottom: 3 }}>NUMÉRO (IDENTIFIANT)</div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: 'var(--text)', fontWeight: 600 }}>{resultat.numeroGerant}</div>
+              <div className="cred-label">NUMÉRO (IDENTIFIANT)</div>
+              <div className="cred-value">{resultat.numeroGerant}</div>
             </div>
-            <button className="btn-ghost" style={{ flex: 'none', padding: '6px 12px', fontSize: 11.5 }} onClick={() => copier(resultat.numeroGerant, 'num')}>
+            <button className="cred-copy" onClick={() => copier(resultat.numeroGerant, 'num')}>
               {copied === 'num' ? '✓ Copié' : 'Copier'}
             </button>
           </div>
 
-          {/* Mot de passe */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 9, padding: '10px 14px' }}>
+          <div className="cred-row">
             <div>
-              <div style={{ fontSize: 9.5, color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '.06em', marginBottom: 3 }}>MOT DE PASSE</div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: 'var(--text)', fontWeight: 600 }}>{resultat.motDePasse}</div>
+              <div className="cred-label">MOT DE PASSE</div>
+              <div className="cred-value">{resultat.motDePasse}</div>
             </div>
-            <button className="btn-ghost" style={{ flex: 'none', padding: '6px 12px', fontSize: 11.5 }} onClick={() => copier(resultat.motDePasse, 'mdp')}>
+            <button className="cred-copy" onClick={() => copier(resultat.motDePasse, 'mdp')}>
               {copied === 'mdp' ? '✓ Copié' : 'Copier'}
             </button>
+          </div>
+
+          <div style={{ marginTop: 12, fontSize: 12, color: '#166534', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Icon.Clock style={{ width: 13, height: 13 }} />
+            Abonnement actif jusqu'au : <strong>{new Date(resultat.dateFin).toLocaleDateString('fr-FR')}</strong>
           </div>
         </div>
       )}
 
-      {error && (
-        <div style={{ background: 'rgba(194,75,63,.08)', color: 'var(--danger)', fontSize: 12.5, padding: '10px 13px', borderRadius: 9, marginBottom: 16, border: '1px solid rgba(194,75,63,.2)' }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="alert-error">{error}</div>}
 
       <form onSubmit={submit}>
-        {/* Préfixe gérant */}
         <div className="m-field">
           <label>Préfixe du numéro gérant (3 chiffres)</label>
           <input
@@ -178,9 +171,7 @@ export default function Creation() {
             placeholder="Ex : 077"
             required
           />
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 5 }}>
-            Le système complètera les 7 chiffres restants automatiquement.
-          </div>
+          <div className="hint">Le système complétera les 7 chiffres restants automatiquement.</div>
         </div>
 
         <div className="m-field">
@@ -211,21 +202,19 @@ export default function Creation() {
         </div>
 
         <div className="m-field">
-          <label>Date de fin d'abonnement</label>
+          <label>Date de fin d'abonnement (optionnel)</label>
           <input
             type="date"
             value={form.dateFin}
             onChange={(e) => setForm({ ...form, dateFin: e.target.value })}
           />
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 5 }}>
-            Si vide, essai gratuit de 30 jours appliqué automatiquement.
-          </div>
+          <div className="hint">Si vide, essai gratuit de 30 jours appliqué automatiquement.</div>
         </div>
 
         <button
           type="submit"
           className="btn-primary"
-          style={{ width: '100%', justifyContent: 'center' }}
+          style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}
           disabled={loading}
         >
           <Icon.Plus />

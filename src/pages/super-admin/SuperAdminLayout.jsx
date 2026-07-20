@@ -28,6 +28,20 @@ export default function SuperAdminLayout() {
   return (
     <div className="sa">
       <style>{`
+        /* ======== RESET GLOBAL (supprime l'espace à gauche) ======== */
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          min-height: 100vh;
+        }
+        #root {
+          margin: 0 !important;
+          padding: 0 !important;
+          max-width: none !important;
+          width: 100% !important;
+        }
+
         :root {
           --bg: #F6F8F7;
           --bg-2: #FFFFFF;
@@ -50,7 +64,7 @@ export default function SuperAdminLayout() {
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); }
-        .sa { display: flex; min-height: 100vh; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
+        .sa { display: flex; min-height: 100vh; width: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
 
         /* ======== SIDEBAR ======== */
         .sidebar {
@@ -58,21 +72,21 @@ export default function SuperAdminLayout() {
           background: var(--bg-2);
           border-right: 1px solid var(--border);
           display: flex; flex-direction: column;
-          padding: 0; position: sticky; top: 0; height: 100vh;
+          padding: 0; margin: 0; position: sticky; top: 0; left: 0; height: 100vh;
           box-shadow: var(--shadow);
         }
-        .sidebar-top { padding: 20px 16px 0; }
-        .sa-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 20px; }
+        .sidebar-top { padding: 18px 14px 0; }
+        .sa-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 14px; }
         .sa-brand img { width: 30px; height: 30px; border-radius: 8px; }
         .sa-brand-text { display: flex; flex-direction: column; }
         .sa-brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); line-height: 1.2; }
         .sa-brand-name span { color: var(--accent); }
         .sa-brand-sub { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
 
-        .nav-divider { height: 1px; background: var(--border); margin: 4px 8px 12px; }
+        .nav-divider { height: 1px; background: var(--border); margin: 0 8px 10px; }
         .nav-section-label {
           font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em;
-          text-transform: uppercase; color: var(--muted); padding: 0 16px; margin-bottom: 4px; font-weight: 600;
+          text-transform: uppercase; color: var(--muted); padding: 0 16px; margin-bottom: 6px; font-weight: 600;
         }
         .nav-item {
           display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 10px;
